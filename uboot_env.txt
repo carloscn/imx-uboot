@@ -1,0 +1,34 @@
+setenv ethaddr 00:04:9f:04:d2:35
+setenv ipaddr 192.168.31.157
+setenv gatewayip 192.168.1.1
+setenv netmask 255.255.255.0
+setenv serverip 192.168.1.250
+
+nfs 80800000 192.168.31.247:/home/carlos/nfs/zImage
+
+nfs 83000000 192.168.31.247:/home/carlos/nfs/imx6ull-14x14-evk.dtb
+
+bootz 80800000 - 83000000
+
+setenv bootargs 'console=ttymxc0,115200 root=/dev/mmcblk1p2 rootwait rw'
+bootargs=console=ttymxc0,115200 root=/dev/nfs ip=dhcp nfsroot=:,v3,tcp
+
+
+
+tftp
+
+```
+service tftp
+{
+        socket_type             = dgram
+        protocol                = udp
+        wait                    = yes
+        user                    = root
+        server                  = /usr/sbin/in.tftpd
+        server_args             = -s /home/carlos/tftp
+        disable                 = no
+        per_source              = 11
+        cps                     = 100 2
+        flags                   = IPv4
+}
+```
