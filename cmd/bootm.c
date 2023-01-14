@@ -580,7 +580,7 @@ static int bootz_start(cmd_tbl_t *cmdtp, int flag, int argc,
 {
 	int ret;
 	ulong zi_start, zi_end;
-
+	puts("Carlos dirty bootz_start: run the bootz_start function\n");
 	ret = do_bootm_states(cmdtp, flag, argc, argv, BOOTM_STATE_START,
 			      images, 1);
 
@@ -695,7 +695,7 @@ static int booti_setup(bootm_headers_t *images)
 		puts("Bad Linux ARM64 Image magic!\n");
 		return 1;
 	}
-	
+
 	if (ih->image_size == 0) {
 		puts("Image lacks image_size field, assuming 16MiB\n");
 		ih->image_size = (16 << 20);
