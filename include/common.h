@@ -268,6 +268,7 @@ int set_cpu_clk_info(void);
 int mdm_init(void);
 #if defined(CONFIG_DISPLAY_CPUINFO)
 int print_cpuinfo(void);
+int get_cpuinfo_str(char* str);
 #else
 static inline int print_cpuinfo(void)
 {

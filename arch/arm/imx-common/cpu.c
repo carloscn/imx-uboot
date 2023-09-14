@@ -251,6 +251,48 @@ int print_cpuinfo(void)
 }
 #endif
 
+int get_cpuinfo_str(char* str)
+{
+	if (NULL == str) {
+		return -1;
+	}
+
+	u32 cpurev;
+	__maybe_unused u32 max_freq;
+#if defined(CONFIG_DBG_MONITOR)
+	struct dbg_monitor_regs *dbg =
+		(struct dbg_monitor_regs *)DEBUG_MONITOR_BASE_ADDR;
+#endif
+
+	cpurev = get_cpu_rev();
+
+#if defined(CONFIG_IMX_THERMAL)
+	struct udevice *thermal_dev;
+	int cpu_tmp, minc, maxc, ret;
+
+	sprintf(str, "CPU:   Freescale i.MX%s rev%d.%d",
+	       get_imx_type((cpurev & 0xFF000) >> 12),
+	       (cpurev & 0x000F0) >> 4,
+	       (cpurev & 0x0000F) >> 0);
+	max_freq = get_cpu_speed_grade_hz();
+	if (!max_freq || max_freq == mxc_get_clock(MXC_ARM_CLK)) {
+		sprintf(str, "%s at %dMHz\n", str, mxc_get_clock(MXC_ARM_CLK) / 1000000);
+	} else {
+		sprintf(str, "%s at %d MHz (running at %d MHz)\n", str, max_freq / 1000000,
+		       mxc_get_clock(MXC_ARM_CLK) / 1000000);
+	}
+#else
+	sprintf(str, "CPU:   Freescale i.MX%s rev%d.%d at %d MHz\n",
+		get_imx_type((cpurev & 0xFF000) >> 12),
+		(cpurev & 0x000F0) >> 4,
+		(cpurev & 0x0000F) >> 0,
+		mxc_get_clock(MXC_ARM_CLK) / 1000000);
+#endif
+
+	return 0;
+}
+
+
 int cpu_eth_init(bd_t *bis)
 {
 	int rc = -ENODEV;
