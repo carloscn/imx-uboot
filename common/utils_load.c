@@ -6,7 +6,7 @@
 #include <linux/stddef.h>
 
 #define HSE_VERSION "2.0"
-#define NONE_HSE_VERSION "1.1"
+#define NONE_HSE_VERSION "1.0"
 
 static int get_cpu_verison(char *version)
 {
@@ -57,6 +57,8 @@ finish:
 
 #define LOAD_ADDR (0x80000020UL)
 #define BOOT_SEQ_OFFSET (0x28UL)
+#define SECURE_BOOT_ENABLED (1UL)
+#define SECURE_BOOT_DISABLED (0UL)
 static int get_secure_boot_flags(int *result)
 {
     int ret = 0;
@@ -78,6 +80,7 @@ static int do_utils_load(cmd_tbl_t *cmdtp, int flag, int argc, char* const argv[
 {
     int ret = 0;
     int i = 0;
+    volatile int sec_flag = 0;
     char version[1024] = {0};
 
     printf("[INFO] The input is %d\n", argc);
@@ -91,9 +94,13 @@ static int do_utils_load(cmd_tbl_t *cmdtp, int flag, int argc, char* const argv[
         goto finish;
     }
 
-    printf("[INFO] %s\n", version);
+    printf("[INFO] Check the verison is %s\n", version);
+    if (0 == strcmp(version, NONE_HSE_VERSION)) {
+        printf("[INFO] Skip the secure boot checking\n");
+        goto finish;
+    }
 
-    int sec_flag = 0;
+    printf("[INFO] Checking the secure boot.\n");
     ret = get_secure_boot_flags(&sec_flag);
     if (ret != 0) {
         ret = CMD_RET_FAILURE;
@@ -101,6 +108,13 @@ static int do_utils_load(cmd_tbl_t *cmdtp, int flag, int argc, char* const argv[
     }
 
     printf("[INFO] secure flags is %d\n", sec_flag);
+    if (SECURE_BOOT_ENABLED == sec_flag) {
+        printf("[INFO] Checked secure flags is enabled\n");
+        goto finish;
+    } else {
+        printf("[INFO] Checked secure flags is not enabled. Hang.....\n");
+        ret = 8;
+    }
 
 finish:
     return ret;
